@@ -1,8 +1,9 @@
 import { describe, it, expect } from "vitest";
 import type { ChatCompletion, ChatCompletionMessageParam } from "openai/resources/chat/completions";
-import { BaseAgent, type LLMClient } from "../BaseAgent.js";
-import { MessageRole } from "../../types/message.js";
-import { ToolErrorCode, type ToolDefinition, type ToolRegistry, type ToolResult } from "../../types/tool.js";
+import { BaseAgent } from "../index.js";
+import type { LLMClient } from "../../llm/index.js";
+import { MessageRole } from "../../../types/message.js";
+import { ToolErrorCode, type ToolDefinition, type ToolRegistry, type ToolResult } from "../../../types/tool.js";
 
 /** 按顺序返回预设响应的假 LLM client */
 function makeFakeLLM(responses: ChatCompletion[]): LLMClient {

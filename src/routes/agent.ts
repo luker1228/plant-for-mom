@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 import { z } from "zod";
-import { PlantAgent } from "../agent/PlantAgent.js";
-import { log, withLogContext } from "../lib/logger.js";
-import { openaiLLMClient } from "../lib/openai.js";
+import { PlantAgent } from "../core/agent/PlantAgent.js";
+import { log, withLogContext } from "../lib/logger/index.js";
+import { openaiLLMClient } from "../core/llm/index.js";
 
 const agentRoutes = new Hono();
 const plantAgent = new PlantAgent(openaiLLMClient);
@@ -30,7 +30,7 @@ agentRoutes.post("/message", async (c) => {
     );
     return c.json(result);
   } catch (err) {
-    log.error("agent message failed", { err });
+    log.error(`agent message failed: ${(err as Error).message}`);
     return c.json({ error: "Agent processing failed" }, 500);
   }
 });

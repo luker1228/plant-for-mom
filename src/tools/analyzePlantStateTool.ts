@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { openai, VISION_MODEL } from "../lib/openai.js";
+import { openai, modelManager } from "../core/llm/index.js";
 import { db, schema } from "../db/index.js";
 import { plantStateAnalysisSchema } from "../types/index.js";
 import type { PlantStateAnalysis } from "../types/index.js";
@@ -117,7 +117,7 @@ ${recentObservations
     ];
 
     const response = await openai.chat.completions.create({
-      model: VISION_MODEL,
+      model: modelManager.pickModel({ vision: true }),
       messages,
       response_format: { type: "json_object" },
     });

@@ -3,10 +3,11 @@ import type {
   ChatCompletionTool,
   ChatCompletion,
 } from "openai/resources/chat/completions";
-import { log, withLogContext } from "../lib/logger.js";
-import { MessageRole } from "../types/message.js";
-import { ToolErrorCode } from "../types/tool.js";
-import type { ToolDefinition, ToolResult, ToolRegistry } from "../types/tool.js";
+import { log, withLogContext, LogField } from "../../lib/logger/index.js";
+import { MessageRole } from "../../types/message.js";
+import { ToolErrorCode } from "../../types/tool.js";
+import type { ToolDefinition, ToolResult, ToolRegistry } from "../../types/tool.js";
+import type { LLMClient } from "../llm/index.js";
 
 export interface AgentRequest {
   message: string;
@@ -28,13 +29,6 @@ export interface ToolCallRecord {
 export interface AgentRunResult {
   reply: string;
   toolCalls: ToolCallRecord[];
-}
-
-export interface LLMClient {
-  chat(
-    messages: ChatCompletionMessageParam[],
-    tools?: ChatCompletionTool[],
-  ): Promise<ChatCompletion>;
 }
 
 export interface BaseAgentConfig {
@@ -68,7 +62,7 @@ export class BaseAgent {
 
       if (!assistantMessage.tool_calls?.length) {
         const reply = assistantMessage.content ?? "";
-        log.info("agent run done", { reply: reply.slice(0, 60), toolCalls: toolCalls.length });
+        log.info(`agent run done: ${toolCalls.length} tool calls`);
         await this.onComplete(reply, toolCalls, request, context);
         return { reply, toolCalls };
       }
@@ -76,11 +70,11 @@ export class BaseAgent {
       for (const call of assistantMessage.tool_calls) {
         const { result, record } = await this.executeToolCall(call, context);
         toolCalls.push(record);
-        messages.push(result.metadata);
+        messages.push({ ...result.metadata, tool_call_id: call.id } as ChatCompletionMessageParam);
       }
     }
 
-    log.warn("max rounds reached", { toolCalls: toolCalls.length });
+    log.warn(`max rounds reached: ${toolCalls.length} tool calls`);
     const reply = "已达到工具调用上限，请稍后重试。";
     await this.onComplete(reply, toolCalls, request, context);
     return { reply, toolCalls };
@@ -132,7 +126,7 @@ export class BaseAgent {
     const tool = this.tools[toolName];
 
     if (!tool) {
-      log.warn("tool not found", { toolName });
+      log.warn(`tool not found: ${toolName}`);
       const result: ToolResult = {
         success: false,
         code: ToolErrorCode.ToolNotFound,
@@ -153,7 +147,7 @@ export class BaseAgent {
     try {
       args = JSON.parse(call.function.arguments || "{}");
     } catch (error) {
-      log.warn("invalid tool args", { toolName, raw: call.function.arguments });
+      log.warn(`invalid tool args for ${toolName}: ${call.function.arguments}`);
       const result: ToolResult = {
         success: false,
         code: ToolErrorCode.InvalidArgs,
@@ -173,11 +167,13 @@ export class BaseAgent {
     let result: ToolResult;
     const start = Date.now();
     try {
-      result = await withLogContext({ tool: toolName }, () =>
+      result = await withLogContext({ [LogField.ToolName]: toolName }, () =>
         tool.execute(args as never, context as never),
       );
     } catch (error) {
-      log.error("tool execute threw", { toolName, err: error, durationMs: Date.now() - start });
+      log.error(`tool ${toolName} threw: ${(error as Error).message}`, {
+        [LogField.DurationMs]: Date.now() - start,
+      });
       result = {
         success: false,
         code: ToolErrorCode.ExecutionFailed,
@@ -190,10 +186,13 @@ export class BaseAgent {
       };
     }
 
+    const durationMs = Date.now() - start;
     if (result.success) {
-      log.info("tool ok", { toolName, durationMs: Date.now() - start });
+      log.info(`tool ${toolName} ok in ${durationMs}ms`);
     } else {
-      log.warn("tool failed", { toolName, code: result.code, durationMs: Date.now() - start });
+      log.warn(`tool ${toolName} failed: ${result.code}`, {
+        [LogField.DurationMs]: durationMs,
+      });
     }
 
     this.onToolResult(toolName, args, result, context);

@@ -1,22 +1,22 @@
-import { BaseAgent } from "./BaseAgent.js";
-import type {
-  AgentContext,
-  AgentRequest,
-  AgentRunResult,
-  LLMClient,
-  ToolCallRecord,
-} from "./BaseAgent.js";
-import { log, withLogContext } from "../lib/logger.js";
-import { SYSTEM_PROMPT } from "../lib/prompts.js";
-import { db, schema } from "../db/index.js";
-import { identifyPlantTool } from "../tools/identifyPlantTool.js";
-import { getCareGuideTool } from "../tools/getCareGuideTool.js";
-import { analyzePlantStateTool } from "../tools/analyzePlantStateTool.js";
-import { savePlantProfileTool } from "../tools/savePlantProfileTool.js";
-import { saveObservationTool } from "../tools/saveObservationTool.js";
-import { createCareTaskTool } from "../tools/createCareTaskTool.js";
-import { getEnvironmentTool } from "../tools/getEnvironmentTool.js";
-import type { ToolDefinition, ToolResult } from "../types/tool.js";
+import { log, withLogContext } from "../../lib/logger/index.js";
+import {
+  BaseAgent,
+  type AgentContext,
+  type AgentRequest,
+  type AgentRunResult,
+  type ToolCallRecord,
+} from "./index.js";
+import type { LLMClient } from "../llm/index.js";
+import { SYSTEM_PROMPT } from "../../lib/prompts.js";
+import { db, schema } from "../../db/index.js";
+import { identifyPlantTool } from "../../tools/identifyPlantTool.js";
+import { getCareGuideTool } from "../../tools/getCareGuideTool.js";
+import { analyzePlantStateTool } from "../../tools/analyzePlantStateTool.js";
+import { savePlantProfileTool } from "../../tools/savePlantProfileTool.js";
+import { saveObservationTool } from "../../tools/saveObservationTool.js";
+import { createCareTaskTool } from "../../tools/createCareTaskTool.js";
+import { getEnvironmentTool } from "../../tools/getEnvironmentTool.js";
+import type { ToolDefinition, ToolResult } from "../../types/tool.js";
 
 export interface PlantAgentContext extends AgentContext {
   plantId?: string;
@@ -83,10 +83,7 @@ export class PlantAgent extends BaseAgent {
         ),
     );
 
-    log.info("agent chat done", {
-      rounds: result.toolCalls.length,
-      plantId: this.resolvedPlantId,
-    });
+    log.info(`agent chat done: ${result.toolCalls.length} rounds, plantId=${this.resolvedPlantId ?? "none"}`);
 
     return {
       reply: result.reply,

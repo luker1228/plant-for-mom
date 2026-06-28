@@ -1,4 +1,4 @@
-import { openai, VISION_MODEL } from "../lib/openai.js";
+import { openai, modelManager } from "../core/llm/index.js";
 import { plantIdentificationResultSchema } from "../types/index.js";
 import { MessageRole } from "../types/message.js";
 import type { ToolContext, ToolDefinition, ToolResult } from "../types/tool.js";
@@ -74,7 +74,7 @@ export const identifyPlantTool: ToolDefinition<IdentifyPlantParams, PlantIdentif
     ];
 
     const response = await openai.chat.completions.create({
-      model: VISION_MODEL,
+      model: modelManager.pickModel({ vision: true }),
       messages,
       response_format: { type: "json_object" },
     });

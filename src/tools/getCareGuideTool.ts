@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { openai, MODEL } from "../lib/openai.js";
+import { openai, modelManager } from "../core/llm/index.js";
 import { db, schema } from "../db/index.js";
 import { careGuideSchema } from "../types/index.js";
 import type { CareGuide } from "../types/index.js";
@@ -75,7 +75,7 @@ export const getCareGuideTool: ToolDefinition<GetCareGuideParams, CareGuide> = {
     ];
 
     const response = await openai.chat.completions.create({
-      model: MODEL,
+      model: modelManager.pickModel({ reasoning: true }),
       messages,
       response_format: { type: "json_object" },
     });
