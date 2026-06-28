@@ -9,6 +9,22 @@ import {
   varchar,
   pgEnum,
 } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
+
+export const users = pgTable("users", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  externalId: varchar("external_id", { length: 128 }).notNull().unique(),
+  nickname: varchar("nickname", { length: 255 }),
+  avatarUrl: text("avatar_url"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const usersRelations = relations(users, ({ many }) => ({
+  plants: many(plantProfiles),
+  observations: many(plantObservations),
+  careTasks: many(careTasks),
+  conversations: many(conversations),
+}));
 
 export const plantLifecycleStatusEnum = pgEnum("plant_lifecycle_status", [
   "unknown_plant",
@@ -56,6 +72,13 @@ export const plantProfiles = pgTable("plant_profiles", {
   ...timestamps,
 });
 
+export const plantProfilesRelations = relations(plantProfiles, ({ one, many }) => ({
+  user: one(users, { fields: [plantProfiles.userId], references: [users.id] }),
+  observations: many(plantObservations),
+  careTasks: many(careTasks),
+  careGuides: many(careGuides),
+}));
+
 export const plantObservations = pgTable("plant_observations", {
   id: uuid("id").primaryKey().defaultRandom(),
   plantId: uuid("plant_id").notNull(),
@@ -71,6 +94,11 @@ export const plantObservations = pgTable("plant_observations", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
+export const plantObservationsRelations = relations(plantObservations, ({ one }) => ({
+  user: one(users, { fields: [plantObservations.userId], references: [users.id] }),
+  plant: one(plantProfiles, { fields: [plantObservations.plantId], references: [plantProfiles.id] }),
+}));
+
 export const careGuides = pgTable("care_guides", {
   id: uuid("id").primaryKey().defaultRandom(),
   plantId: uuid("plant_id").notNull(),
@@ -78,6 +106,10 @@ export const careGuides = pgTable("care_guides", {
   version: integer("version").default(1).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
+
+export const careGuidesRelations = relations(careGuides, ({ one }) => ({
+  plant: one(plantProfiles, { fields: [careGuides.plantId], references: [plantProfiles.id] }),
+}));
 
 export const careTasks = pgTable("care_tasks", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -91,6 +123,12 @@ export const careTasks = pgTable("care_tasks", {
   ...timestamps,
 });
 
+export const careTasksRelations = relations(careTasks, ({ one, many }) => ({
+  user: one(users, { fields: [careTasks.userId], references: [users.id] }),
+  plant: one(plantProfiles, { fields: [careTasks.plantId], references: [plantProfiles.id] }),
+  logs: many(careTaskLogs),
+}));
+
 export const careTaskLogs = pgTable("care_task_logs", {
   id: uuid("id").primaryKey().defaultRandom(),
   taskId: uuid("task_id").notNull(),
@@ -99,6 +137,11 @@ export const careTaskLogs = pgTable("care_task_logs", {
   note: text("note"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
+
+export const careTaskLogsRelations = relations(careTaskLogs, ({ one }) => ({
+  task: one(careTasks, { fields: [careTaskLogs.taskId], references: [careTasks.id] }),
+  plant: one(plantProfiles, { fields: [careTaskLogs.plantId], references: [plantProfiles.id] }),
+}));
 
 export const conversations = pgTable("conversations", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -110,3 +153,8 @@ export const conversations = pgTable("conversations", {
   metadata: jsonb("metadata"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
+
+export const conversationsRelations = relations(conversations, ({ one }) => ({
+  user: one(users, { fields: [conversations.userId], references: [users.id] }),
+  plant: one(plantProfiles, { fields: [conversations.plantId], references: [plantProfiles.id] }),
+}));

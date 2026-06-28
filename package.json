@@ -15,8 +15,12 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.13.7",
+    "@pothos/core": "^4.13.0",
+    "@pothos/plugin-dataloader": "^4.4.4",
     "dotenv": "^16.4.7",
     "drizzle-orm": "^0.38.3",
+    "graphql": "^16.14.2",
+    "graphql-yoga": "^5.21.2",
     "hono": "^4.6.14",
     "nanoid": "^5.0.9",
     "openai": "^4.77.0",
