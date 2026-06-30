@@ -1,0 +1,14 @@
+{
+  "pages": [
+    "dist/build/mp-weixin/pages/index/index",
+    "dist/build/mp-weixin/pages/plant-detail/index",
+    "dist/build/mp-weixin/pages/add-plant/index"
+  ],
+  "window": {
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "植物养护",
+    "navigationBarBackgroundColor": "#4CAF50",
+    "backgroundColor": "#F5F5F5"
+  },
+  "usingComponents": {}
+}

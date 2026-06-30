@@ -24,17 +24,5 @@
     "navigationBarTitleText": "植物养护",
     "navigationBarBackgroundColor": "#4CAF50",
     "backgroundColor": "#F5F5F5"
-  },
-  "tabBar": {
-    "color": "#999999",
-    "selectedColor": "#4CAF50",
-    "backgroundColor": "#FFFFFF",
-    "borderStyle": "black",
-    "list": [
-      {
-        "pagePath": "pages/index/index",
-        "text": "我的植物"
-      }
-    ]
   }
 }
