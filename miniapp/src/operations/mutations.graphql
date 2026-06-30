@@ -1,0 +1,82 @@
+mutation CreateUser($externalId: String!, $nickname: String, $avatarUrl: String) {
+  createUser(externalId: $externalId, nickname: $nickname, avatarUrl: $avatarUrl) {
+    id
+    externalId
+    nickname
+    avatarUrl
+  }
+}
+
+mutation CreatePlant(
+  $userId: ID!
+  $name: String!
+  $species: String
+  $commonName: String
+  $location: String
+  $potType: String
+  $soilType: String
+  $lightCondition: String
+  $growthStage: String
+  $notes: String
+) {
+  createPlant(
+    userId: $userId
+    name: $name
+    species: $species
+    commonName: $commonName
+    location: $location
+    potType: $potType
+    soilType: $soilType
+    lightCondition: $lightCondition
+    growthStage: $growthStage
+    notes: $notes
+  ) {
+    id
+    userId
+    name
+    species
+    commonName
+    location
+    potType
+    soilType
+    lightCondition
+    growthStage
+    lifecycleStatus
+    avatarUrl
+    notes
+    createdAt
+    updatedAt
+  }
+}
+
+mutation DeletePlant($id: ID!) {
+  deletePlant(id: $id)
+}
+
+mutation CreateCareTask($plantId: ID!, $userId: ID!, $type: CareTaskType!, $title: String, $reason: String) {
+  createCareTask(plantId: $plantId, userId: $userId, type: $type, title: $title, reason: $reason) {
+    id
+    plantId
+    type
+    title
+    dueDate
+    status
+    reason
+    createdAt
+    updatedAt
+  }
+}
+
+mutation UpdateCareTaskStatus($id: ID!, $status: CareTaskStatus!, $note: String) {
+  updateCareTaskStatus(id: $id, status: $status, note: $note) {
+    id
+    plantId
+    type
+    title
+    dueDate
+    status
+    reason
+    createdAt
+    updatedAt
+  }
+}

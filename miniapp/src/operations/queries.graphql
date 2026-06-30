@@ -1,0 +1,77 @@
+query Plants($userId: ID!) {
+  plants(userId: $userId) {
+    id
+    userId
+    name
+    species
+    commonName
+    location
+    potType
+    soilType
+    lightCondition
+    growthStage
+    lifecycleStatus
+    avatarUrl
+    notes
+    createdAt
+    updatedAt
+  }
+}
+
+query Plant($id: ID!) {
+  plant(id: $id) {
+    id
+    userId
+    name
+    species
+    commonName
+    location
+    potType
+    soilType
+    lightCondition
+    growthStage
+    lifecycleStatus
+    avatarUrl
+    notes
+    createdAt
+    updatedAt
+  }
+}
+
+query CareTasks($plantId: ID!, $status: CareTaskStatus) {
+  careTasks(plantId: $plantId, status: $status) {
+    id
+    plantId
+    type
+    title
+    dueDate
+    status
+    reason
+    createdAt
+    updatedAt
+  }
+}
+
+query Observations($plantId: ID!, $limit: Int) {
+  observations(plantId: $plantId, limit: $limit) {
+    id
+    plantId
+    date
+    imageUrls
+    symptoms
+    userNote
+    soilMoisture
+    temperature
+    humidity
+    lightHours
+  }
+}
+
+query UserByExternalId($externalId: String!) {
+  userByExternalId(externalId: $externalId) {
+    id
+    externalId
+    nickname
+    avatarUrl
+  }
+}

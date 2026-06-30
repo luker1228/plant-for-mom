@@ -1,0 +1,113 @@
+type CareTask {
+  createdAt: DateTime!
+  dueDate: DateTime
+  id: ID
+  logs: [CareTaskLog!]!
+  plantId: ID
+  reason: String
+  status: String!
+  title: String
+  type: String!
+  updatedAt: DateTime!
+  userId: String!
+}
+
+type CareTaskLog {
+  action: String!
+  createdAt: DateTime!
+  id: ID
+  note: String
+  plantId: ID
+  taskId: ID
+}
+
+enum CareTaskStatus {
+  done
+  pending
+  skipped
+}
+
+enum CareTaskType {
+  fertilizing
+  observation
+  pruning
+  repotting
+  watering
+}
+
+scalar DateTime
+
+type Mutation {
+  addObservation(date: DateTime!, humidity: Float, imageUrls: [String!], lightHours: Float, plantId: ID!, soilMoisture: String, symptoms: [String!], temperature: Float, userId: ID!, userNote: String): Observation!
+  createCareTask(dueDate: DateTime, plantId: ID!, reason: String, title: String, type: CareTaskType!, userId: ID!): CareTask!
+  createPlant(avatarUrl: String, commonName: String, growthStage: String, lightCondition: String, location: String, name: String!, notes: String, potType: String, soilType: String, species: String, userId: ID!): Plant!
+  createUser(avatarUrl: String, externalId: String!, nickname: String): User!
+  deleteCareTask(id: ID!): Boolean!
+  deletePlant(id: ID!): Boolean!
+  updateCareTaskStatus(id: ID!, note: String, status: CareTaskStatus!): CareTask
+  updatePlant(avatarUrl: String, id: ID!, lifecycleStatus: PlantLifecycleStatus, location: String, name: String, notes: String): Plant
+}
+
+type Observation {
+  createdAt: DateTime!
+  date: DateTime!
+  humidity: Float
+  id: ID
+  imageUrls: [String!]
+  lightHours: Float
+  plantId: ID
+  soilMoisture: String
+  symptoms: [String!]
+  temperature: Float
+  userId: String!
+  userNote: String
+}
+
+type Plant {
+  avatarUrl: String
+  careTasks: [CareTask!]!
+  commonName: String
+  createdAt: DateTime!
+  growthStage: String
+  id: ID
+  lifecycleStatus: String!
+  lightCondition: String
+  location: String
+  name: String!
+  notes: String
+  observations: [Observation!]!
+  potType: String
+  soilType: String
+  species: String
+  updatedAt: DateTime!
+  userId: String!
+}
+
+enum PlantLifecycleStatus {
+  care_plan_created
+  follow_up_scheduled
+  identified
+  need_action
+  observing
+  profile_created
+  unknown_plant
+}
+
+type Query {
+  careTasks(plantId: ID!, status: CareTaskStatus): [CareTask!]!
+  observations(limit: Int, plantId: ID!): [Observation!]!
+  plant(id: ID!): Plant
+  plants(userId: ID!): [Plant!]!
+  user(id: ID!): User
+  userByExternalId(externalId: String!): User
+  users: [User!]!
+}
+
+type User {
+  avatarUrl: String
+  createdAt: DateTime!
+  externalId: String!
+  id: ID
+  nickname: String
+  plants: [Plant!]!
+}
